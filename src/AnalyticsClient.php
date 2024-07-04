@@ -17,8 +17,7 @@ class AnalyticsClient
     public function __construct(
         protected BetaAnalyticsDataClient $service,
         protected Repository $cache,
-    ) {
-    }
+    ) {}
 
     public function setCacheLifeTimeInMinutes(int $cacheLifeTimeInMinutes): self
     {
