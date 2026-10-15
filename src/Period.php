@@ -5,6 +5,7 @@ namespace Spatie\Analytics;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Google\Analytics\Data\V1beta\DateRange;
+use Google\Analytics\Data\V1beta\MinuteRange;
 use Illuminate\Support\Traits\Macroable;
 use Spatie\Analytics\Exceptions\InvalidPeriod;
 
@@ -61,8 +62,15 @@ class Period
 
     public function toDateRange(): DateRange
     {
-        return (new DateRange())
+        return (new DateRange)
             ->setStartDate($this->startDate->format('Y-m-d'))
             ->setEndDate($this->endDate->format('Y-m-d'));
+    }
+
+    public function toMinuteRange(): MinuteRange
+    {
+        return (new MinuteRange)
+            ->setStartMinutesAgo($this->endDate->diff($this->startDate)->i)
+            ->setEndMinutesAgo($this->endDate->format('i'));
     }
 }

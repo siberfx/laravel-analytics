@@ -1,11 +1,19 @@
-<p align="center"><img src="/art/socialcard.png" alt="Social Card of Laravel Analytics"></p>
+<div align="left">
+    <a href="https://spatie.be/open-source?utm_source=github&utm_medium=banner&utm_campaign=laravel-analytics">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://spatie.be/packages/header/laravel-analytics/html/dark.webp">
+        <img alt="Logo for laravel-analytics" src="https://spatie.be/packages/header/laravel-analytics/html/light.webp">
+      </picture>
+    </a>
 
-#  Retrieve data from Google Analytics
+<h1>Retrieve data from Google Analytics</h1>
 
 [![Latest Version](https://img.shields.io/github/release/spatie/laravel-analytics.svg?style=flat-square)](https://github.com/spatie/laravel-analytics/releases)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 ![Check & fix styling](https://github.com/spatie/laravel-analytics/workflows/Check%20&%20fix%20styling/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-analytics.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-analytics)
+    
+</div>
 
 Using this package you can easily retrieve data from Google Analytics.
 
@@ -237,7 +245,7 @@ The function returns a `Collection` in which each item is an array that holds ke
 For all other queries you can use the `get` function.
 
 ```php
-public function get(Period $period, array $metrics, array $dimensions = [], int $limit = 10, array $orderBy = [], FilterExpression $dimensionFilter = null): Collection
+public function get(Period $period, array $metrics, array $dimensions = [], int $maxResults = 10, array $orderBy = [], int $offset = 0, ?FilterExpression $dimensionFilter = null, bool $keepEmptyRows = false, ?FilterExpression $metricFilter = null): Collection
 ```
 
 Here's some extra info on the arguments you can pass:
@@ -248,11 +256,11 @@ Here's some extra info on the arguments you can pass:
 
 `array $dimensions`: an array of dimensions to group the results by. You can find a list of all dimensions [here](https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#dimensions).
 
-`int $limit`: the maximum number of results to return.
+`int $maxResults`: the maximum number of results to return.
 
 `array $orderBy`: of OrderBy objects to sort the results by. 
 
-`array $offset`: Defaults to 0, you can use this in combination with the $limit param to have pagination.
+`init $offset`: Defaults to 0, you can use this in combination with the $maxResults param to have pagination.
 
 `bool $keepEmptyRows`: If false or unspecified, each row with all metrics equal to 0 will not be returned. If true, these rows will be returned if they are not separately removed by a filter.
 
@@ -284,7 +292,82 @@ $dimensionFilter = new FilterExpression([
 ]);
 ```
 
+`FilterExpression $metricFilter`: filter applied after aggregating the report's rows, similar to SQL having-clause. Dimensions cannot be used in this filter. You can find more details [here](https://cloud.google.com/php/docs/reference/analytics-data/latest/V1beta.RunReportRequest).
+
+For example:
+```php
+use Google\Analytics\Data\V1beta\Filter;
+use Google\Analytics\Data\V1beta\FilterExpression;
+use Google\Analytics\Data\V1beta\Filter\NumericFilter;
+use Google\Analytics\Data\V1beta\NumericValue;
+use Google\Analytics\Data\V1beta\Filter\NumericFilter\Operation;
+
+$metricFilter = new FilterExpression([
+    'filter' => new Filter([
+        'field_name' => 'eventCount',
+        'numeric_filter' => new NumericFilter([
+            'operation' => Operation::GREATER_THAN,
+            'value' => new NumericValue([
+                'int64_value' => 3,
+            ]),
+        ]),
+    ]),    
+]);
+```
+
 ## Testing
+
+### Faking
+
+To fake calls within the package in your own project you can use the `fake` method on the `Spatie\Analytics\Facades\Analytics` facade.
+
+For example:
+
+```php
+<?php
+
+use Spatie\Analytics\Facades\Analytics;
+
+test('feature in your project', function () {
+    // Arrange
+    Analytics::fake();
+
+    // Act
+    $response = $this->actingAs($admin)->get('/analytics');
+
+    // Assert
+    $response->assertStatus(200);
+});
+```
+
+You can also specify the expected result either as an array or `Illuminate\Support\Collection` to be returned when a method is called on the facade.
+
+For example:
+
+```php
+<?php
+
+use Spatie\Analytics\Facades\Analytics;
+
+test('feature in your project', function () {
+    // Arrange
+    Analytics::fake([
+        [
+            'pageTitle' => 'Test Page',
+            'activeUsers' => 10,
+            'screenPageViews' => 20,
+        ],
+    ]);
+
+    // Act
+    $response = $this->actingAs($admin)->get('/analytics');
+
+    // Assert
+    $response->assertStatus(200);
+});
+```
+
+### Package tests
 
 Run the tests with:
 
@@ -309,7 +392,7 @@ If you've found a bug regarding security please mail [security@spatie.be](mailto
 - [Freek Van der Herten](https://github.com/freekmurze)
 - [All Contributors](../../contributors)
 
-And a special thanks to [Caneco](https://twitter.com/caneco) for the logo ✨
+Special thanks to [Caneco](https://twitter.com/caneco) for the original logo.
 
 ## License
 

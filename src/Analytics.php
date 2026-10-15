@@ -2,6 +2,7 @@
 
 namespace Spatie\Analytics;
 
+use Carbon\Carbon;
 use Google\Analytics\Data\V1beta\FilterExpression;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
@@ -28,7 +29,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   pageTitle: string,
      *   activeUsers: int,
      *   screenPageViews: int
@@ -46,9 +47,9 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   pageTitle: string,
-     *   date: \Carbon\Carbon,
+     *   date: Carbon,
      *   activeUsers: int,
      *   screenPageViews: int
      * }>
@@ -68,8 +69,8 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
-     *   date: \Carbon\Carbon,
+     * @return Collection<int, array{
+     *   date: Carbon,
      *   activeUsers: int,
      *   screenPageViews: int
      * }>
@@ -89,7 +90,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   pageTitle: string,
      *   fullPageUrl: string,
      *   screenPageViews: int
@@ -110,7 +111,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   pageReferrer: string,
      *   screenPageViews: int
      * }>
@@ -130,7 +131,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   newVsReturning: string,
      *   activeUsers: int
      * }>
@@ -145,7 +146,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   browser: string,
      *   screenPageViews: int
      * }>
@@ -165,7 +166,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   country: string,
      *   screenPageViews: int
      * }>
@@ -185,7 +186,7 @@ class Analytics
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{
+     * @return Collection<int, array{
      *   operatingSystem: string,
      *   screenPageViews: int
      * }>
@@ -213,6 +214,7 @@ class Analytics
         int $offset = 0,
         ?FilterExpression $dimensionFilter = null,
         bool $keepEmptyRows = false,
+        ?FilterExpression $metricFilter = null,
     ): Collection {
         return $this->client->get(
             $this->propertyId,
@@ -223,7 +225,33 @@ class Analytics
             $orderBy,
             $offset,
             $dimensionFilter,
-            $keepEmptyRows
+            $keepEmptyRows,
+            $metricFilter
+        );
+    }
+
+    public function getRealtime(
+        Period $period,
+        array $metrics,
+        array $dimensions = [],
+        int $maxResults = 10,
+        array $orderBy = [],
+        int $offset = 0,
+        ?FilterExpression $dimensionFilter = null,
+        bool $keepEmptyRows = false,
+        ?FilterExpression $metricFilter = null,
+    ): Collection {
+        return $this->client->getRealtime(
+            $this->propertyId,
+            $period,
+            $metrics,
+            $dimensions,
+            $maxResults,
+            $orderBy,
+            $offset,
+            $dimensionFilter,
+            $keepEmptyRows,
+            $metricFilter
         );
     }
 }
